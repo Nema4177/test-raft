@@ -15,6 +15,7 @@ import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.core.IteratorImpl;
+import com.alipay.sofa.jraft.core.NodeImpl;
 import com.alipay.sofa.jraft.core.ReplicatorGroupImpl;
 import com.alipay.sofa.jraft.entity.NodeId;
 import com.alipay.sofa.jraft.entity.PeerId;
@@ -36,8 +37,9 @@ import com.alipay.sofa.jraft.option.ReplicatorGroupOptions;
 @Component
 public class RaftConfig {
 	
-	@PostConstruct
-	void init() {
+	//@PostConstruct
+	//void init() {
+	public static void main(String args[]) {
 		
 		  String groupId = "jraft";
 		  Endpoint addr = new Endpoint("localhost", 8080);
@@ -45,13 +47,13 @@ public class RaftConfig {
 //		  PeerId peer = new PeerId();
 //		  boolean success = peer.parse(s);
 		  PeerId serverId = JRaftUtils.getPeerId("localhost:8080");
-		  Configuration conf = JRaftUtils.getConfiguration("localhost:8081");
+		  Configuration conf = JRaftUtils.getConfiguration("localhost:8081,localhost:8080");
 		  
 //		  //IteratorImpl it = new IteratorImpl();
-//		  Closure done = new RaftClosure();
-//		  Task task = new Task();
-//		  task.setData(ByteBuffer.wrap("Hello! This is a sample message to test raft..".getBytes()));
-//		  task.setDone(done);
+		  Closure done = new RaftClosure();
+		  Task task = new Task();
+		  task.setData(ByteBuffer.wrap("Hello! This is a sample message to test raft..".getBytes()));
+		  task.setDone(done);
 		  
 		  NodeOptions opts = new NodeOptions();
 		  opts.setElectionTimeoutMs(1000);
@@ -60,13 +62,13 @@ public class RaftConfig {
 		  opts.setSnapshotUri("snapshots");
 		  opts.setFsm(new DemoStateMachine());
 		  opts.setInitialConf(conf);
-		  Node node = RaftServiceFactory.createRaftNode(groupId, serverId);
+		  NodeImpl node = (NodeImpl) RaftServiceFactory.createRaftNode(groupId, serverId);
 		  NodeId nodeId = node.getNodeId();
 		  NodeManager.getInstance().addAddress(serverId.getEndpoint());
 		  BoltRpcServer rpcServer = (BoltRpcServer) RaftRpcServerFactory.createAndStartRaftRpcServer(serverId.getEndpoint());
 		  RaftGroupService cluster = new RaftGroupService(groupId, serverId, opts);
-		  RpcServer rpcServer2 = cluster.getRpcServer();
-		  Node node2 = cluster.start();
+		  //RpcServer rpcServer2 = cluster.getRpcServer();
+		  //Node node2 = cluster.start();
 		  
 		  BoltRaftRpcFactory boltRaftRpcFactory = new BoltRaftRpcFactory();
 		  RpcClient boltRpcClient =  boltRaftRpcFactory.createRpcClient();
@@ -75,10 +77,12 @@ public class RaftConfig {
 		  ReplicatorGroupOptions  replicatorGroupOptions = new ReplicatorGroupOptions();
 		  RaftOptions raftOptions = new RaftOptions();
 		  replicatorGroupOptions.setRaftOptions(raftOptions);
+		  replicatorGroupOptions.setNode(node);
 		  ReplicatorGroupImpl replicatorGroupImpl = new ReplicatorGroupImpl();
 		  replicatorGroupImpl.init(nodeId, replicatorGroupOptions);
 		  
 		  boltRpcClient.registerConnectEventListener(replicatorGroupImpl);
+		  
 		  
 	}
 
