@@ -42,10 +42,11 @@ public class RaftConfig {
 	public static void main(String args[]) {
 		
 		  String groupId = "jraft";
-		  Endpoint addr = new Endpoint("localhost", 8080);
-		  String s = addr.toString(); // 结果为 localhost:8080
+//		  Endpoint addr = new Endpoint("localhost", 8080);
+//		  String s = addr.toString(); // 结果为 localhost:8080
 //		  PeerId peer = new PeerId();
 //		  boolean success = peer.parse(s);
+		Endpoint addr = JRaftUtils.getEndPoint("localhost:8080");
 		  PeerId serverId = JRaftUtils.getPeerId("localhost:8080");
 		  Configuration conf = JRaftUtils.getConfiguration("localhost:8081,localhost:8080");
 		  
